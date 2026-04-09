@@ -1,4 +1,3 @@
-```
 # 营销自动化多智能体系统 (Marketing Multi-Agent System)
 
 ## 项目简介
@@ -11,7 +10,6 @@
 4. **效果评估Agent**：模拟 A/B 测试，输出效果评估报告
 
 ## 项目结构
-```
 ```
 Marketing-Agent-System/
 ├── README.md                  # 项目说明（本文件）
@@ -100,4 +98,3 @@ python src/main.py
 ## 注意事项
 - 请确保 data/UserBehavior.csv 路径正确
 - API Key 不要上传到公开仓库
-```
