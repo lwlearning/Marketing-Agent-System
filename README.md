@@ -47,7 +47,7 @@ Marketing-Agent-System/
 
 ### 1. 环境准备
 ```bash
-git clone https://github.com/your-username/Marketing-Agent-System.git
+git clone https://github.com/lwlearning/Marketing-Agent-System.git
 cd Marketing-Agent-System
 pip install -r requirements.txt
 ```
@@ -60,7 +60,7 @@ MODEL_NAME = "gpt-4o"
 ```
 
 ### 3. 下载数据集
-1. 访问天池淘宝用户行为数据集
+1. 访问天池淘宝用户行为数据集：https://tianchi.aliyun.com/dataset/dataDetail?dataId=649&userId=1
 2. 下载 UserBehavior.csv
 3. 放入 data/ 目录
 
