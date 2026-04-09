@@ -41,6 +41,9 @@ Marketing-Agent-System/
 - **机器学习**：Pandas, Scikit-learn
 - **数据来源**：天池公开淘宝用户行为数据集
 
+## 项目亮点
+基于真实电商用户行为数据构建多智能体营销闭环，覆盖用户分析、策略决策、文案生成、效果评估全流程，结合传统用户分层（RFM）与大模型能力实现自动化营销。
+
 ## 快速开始
 
 ### 1. 环境准备
@@ -58,7 +61,7 @@ MODEL_NAME = "gpt-4o"
 ```
 
 ### 3. 下载数据集
-1. 访问天池淘宝用户行为数据集：https://tianchi.aliyun.com/dataset/dataDetail?dataId=649&userId=1
+1. 访问天池淘宝用户行为数据集：https://tianchi.aliyun.com/dataset/dataDetail?dataId=649
 2. 下载 UserBehavior.csv
 3. 放入 data/ 目录
 
