@@ -12,6 +12,8 @@ MODEL_NAME = "gpt-4o"
 # DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "your-dashscope-key-here")
 # MODEL_NAME = "qwen-max"
 
+# 项目根目录（避免受运行工作目录影响）
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # 数据路径
-DATA_PATH = "data/UserBehavior.csv"
-KNOWLEDGE_BASE_PATH = "knowledge_base/marketing_rules.md"
+DATA_PATH = os.path.join(BASE_DIR, "data", "UserBehavior.csv")
+KNOWLEDGE_BASE_PATH = os.path.join(BASE_DIR, "knowledge_base", "marketing_rules.md")
