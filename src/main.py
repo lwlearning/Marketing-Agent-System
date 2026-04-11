@@ -87,8 +87,13 @@ app = workflow.compile()
 
 
 def main():
-    # 获取一个样本用户ID
-    sample_users = user_agent.get_sample_users(segment="高价值忠诚用户", n=1)
+    # 先打印一下实际有哪些分层，做到心里有数
+    print("当前数据中的用户分层：")
+    print(user_agent.rfm["user_segment"].value_counts())
+    print("-" * 60)
+
+    # 获取一个样本用户ID（不指定分层，直接随机取）
+    sample_users = user_agent.get_sample_users(n=1)
     customer_unique_id = sample_users[0]
 
     print(f"\n开始处理用户：{customer_unique_id}")

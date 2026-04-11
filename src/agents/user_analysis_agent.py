@@ -51,9 +51,16 @@ class UserAnalysisAgent:
         return user_profile
 
     def get_sample_users(self, segment=None, n=5):
-        """获取样本用户ID"""
+        """获取样本用户ID（容错版：指定分层不存在时自动回退）"""
         if segment:
-            sample = self.rfm[self.rfm["user_segment"] == segment].sample(n)
+            # 先检查指定的分层是否存在
+            segment_users = self.rfm[self.rfm["user_segment"] == segment]
+            if len(segment_users) >= n:
+                sample = segment_users.sample(n)
+            else:
+                # 分层不存在或数量不够，回退到随机采样所有用户
+                print(f"[用户分析Agent] 分层「{segment}」不存在或数量不足，回退到随机采样")
+                sample = self.rfm.sample(n)
         else:
             sample = self.rfm.sample(n)
 
