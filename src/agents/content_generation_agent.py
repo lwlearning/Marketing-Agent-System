@@ -5,43 +5,51 @@ import config
 
 class ContentGenerationAgent:
     def __init__(self):
+        # 通义千问兼容模式
         self.llm = ChatOpenAI(
-            model=config.MODEL_NAME,
-            api_key=config.OPENAI_API_KEY,
-            temperature=0.7
+            model=config.QWEN_MODEL,
+            api_key=config.QWEN_API_KEY,
+            base_url=config.QWEN_BASE_URL,
+            temperature=config.TEMPERATURE,
+            max_tokens=config.MAX_TOKENS
         )
 
-    def generate_content(self, user_profile, strategy):
-        """生成营销文案"""
-        print("[文案生成Agent] 正在生成营销文案...")
+    def generate_content(self, user_profile, strategy, recommended_products):
+        print("[文案生成Agent] 正在生成个性化营销文案...")
+
+        products_text = ""
+        for i, product in enumerate(recommended_products, 1):
+            products_text += f"{i}. {product['product_name']} - 原价${product['price']:.2f}\n"
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "你是一个专业的营销文案专家。请根据用户画像和营销策略，生成一条个性化的营销短信文案。"),
+            ("system", "你是一个专业的电商文案专家。请根据用户画像、营销策略和商品推荐，生成一条吸引人的营销短信文案。"),
             ("user", """
 用户画像：
-- 用户分层：{segment}
-- 历史购买次数：{total_purchases}
-- 最近购买天数：{days_since_last_purchase}
+- 用户分层：{user_segment}
+- 总消费：${monetary:.2f}
+- 最喜欢的品类：{favorite_categories}
 
 营销策略：
 - 优惠：{offer}
-- 触达渠道：{channel}
-- 文案风格：{tone}
+- 话术风格：{tone}
 
-请生成一条50字以内的短信文案。
+推荐商品：
+{products_text}
+
+请生成一条70字以内的短信文案，包含优惠信息和至少一个推荐商品。
             """)
         ])
 
         chain = prompt | self.llm
         response = chain.invoke({
-            "segment": strategy['segment'],
-            "total_purchases": user_profile['total_purchases'],
-            "days_since_last_purchase": user_profile['days_since_last_purchase'],
-            "offer": strategy['offer'],
-            "channel": strategy['channel'],
-            "tone": strategy['tone']
+            "user_segment": user_profile["user_segment"],
+            "monetary": user_profile["monetary"],
+            "favorite_categories": user_profile["favorite_categories"],
+            "offer": strategy.get("优惠类型和力度", "专属优惠"),
+            "tone": strategy.get("营销重点和话术风格", "友好"),
+            "products_text": products_text
         })
 
         content = response.content.strip()
-        print(f"[文案生成Agent] 生成的文案：\n{content}\n")
+        print(f"[文案生成Agent] 营销文案生成完成：\n{content}\n")
         return content

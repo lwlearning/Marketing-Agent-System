@@ -1,99 +1,209 @@
-# 营销自动化多智能体系统 (Marketing Multi-Agent System)
+# 营销自动化多智能体系统 (Marketing Agent System)
 
-## 项目简介
-这是一个基于大模型和多智能体技术的营销自动化系统，模拟了从用户分析到效果评估的完整营销闭环。
+一个基于 **LangGraph + 多智能体 + RAG + 机器学习评估** 的电商营销自动化项目，覆盖从用户洞察到策略生成、文案生成和效果评估的完整链路。
 
-### 核心智能体
-1. **用户分析Agent**：基于公开电商数据，对用户进行 RFM 分层和画像
-2. **营销策略Agent**：根据用户画像，匹配知识库生成个性化营销策略
-3. **文案生成Agent**：调用大模型，生成定制化营销文案
-4. **效果评估Agent**：模拟 A/B 测试，输出效果评估报告
+---
 
-## 项目结构
-```
+## 1. 项目概览
+
+本项目围绕“给单个用户生成个性化营销方案”构建了 5 个智能体，并通过工作流编排串联：
+
+1. 用户分析 Agent（RFM + 聚类分层）
+2. 商品推荐 Agent（基于品类偏好 + 热销补足）
+3. 营销策略 Agent（RAG 检索知识库 + LLM 生成策略）
+4. 文案生成 Agent（LLM 生成个性化短信文案）
+5. 效果评估 Agent（模型预测转化率与 ROI）
+
+---
+
+## 2. 核心能力
+
+- 基于 Olist 电商数据进行用户特征工程与分层
+- 基于用户偏好推荐商品（支持价格区间过滤）
+- 基于知识库检索增强（RAG）生成策略
+- 结合推荐商品生成营销文案
+- 基于历史订单特征估计营销效果（转化率/提升幅度/ROI）
+- 使用 LangGraph 构建端到端工作流
+
+---
+
+## 3. 实际项目结构
+
+```text
 Marketing-Agent-System/
-├── README.md                  # 项目说明（本文件）
-├── requirements.txt           # 依赖包列表
-├── config.py                  # 配置文件（API Key 等）
-├── data/                      # 数据集存放目录
-│   └── README.md              # 数据集下载说明
-├── src/
-│   ├── __init__.py
-│   ├── main.py                # 主程序入口
-│   ├── agents/                # 智能体实现
-│   │   ├── __init__.py
-│   │   ├── user_analysis_agent.py
-│   │   ├── strategy_agent.py
-│   │   ├── content_generation_agent.py
-│   │   └── evaluation_agent.py
-│   └── utils/                 # 工具函数
-│       ├── __init__.py
-│       ├── data_processor.py
-│       └── rag_helper.py
-└── knowledge_base/            # 营销知识库（RAG 用）
-    └── marketing_rules.md
+├── .env
+├── config.py
+├── requirements.txt
+├── README.md
+├── data/
+│   └── olist/
+│       ├── olist_orders_dataset.csv
+│       ├── olist_order_items_dataset.csv
+│       ├── olist_order_payments_dataset.csv
+│       ├── olist_customers_dataset.csv
+│       ├── olist_products_dataset.csv
+│       └── product_category_name_translation.csv
+├── knowledge_base/
+│   ├── marketing_rules.md
+│   ├── copywriting_templates.md
+│   └── marketing_strategies.md
+└── src/
+    ├── main.py
+    ├── agents/
+    │   ├── user_analysis_agent.py
+    │   ├── product_recommendation_agent.py
+    │   ├── strategy_agent.py
+    │   ├── content_generation_agent.py
+    │   └── evaluation_agent.py
+    └── utils/
+        ├── data_loader.py
+        ├── feature_engineering.py
+        └── rag_service.py
 ```
 
-## 技术栈
-- **编程语言**：Python 3.9+
-- **多智能体框架**：LangChain
-- **大模型**：OpenAI GPT-4o / 通义千问
-- **机器学习**：Pandas, Scikit-learn
-- **数据来源**：天池公开淘宝用户行为数据集
+---
 
-## 快速开始
+## 4. 技术栈
 
-### 1. 环境准备
+- Python 3.11（推荐）
+- LangGraph
+- LangChain / LangChain OpenAI / LangChain Community
+- FAISS（向量检索）
+- Pandas / NumPy
+- Scikit-learn / XGBoost（当前评估逻辑主要使用 RandomForestRegressor）
+- python-dotenv
+
+---
+
+## 5. 工作流说明（LangGraph）
+
+工作流入口在 `analyze_user`，依次执行：
+
+`analyze_user -> recommend_products -> generate_strategy -> generate_content -> evaluate -> END`
+
+最终输出包含：
+
+- 用户分层与画像
+- 推荐商品列表
+- 个性化营销策略
+- 营销文案
+- 效果预测报告（转化率、提升幅度、ROI、建议）
+
+---
+
+## 6. 环境准备
+
+### 6.1 创建并激活虚拟环境（可选但推荐）
+
 ```bash
-git clone https://github.com/lwlearning/Marketing-Agent-System.git
-cd Marketing-Agent-System
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 6.2 安装依赖
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. 配置 API Key
-编辑 config.py，填入你的 API Key：
-```python
-OPENAI_API_KEY = "sk-your-key"
-MODEL_NAME = "gpt-4o"
+---
+
+## 7. 配置说明
+
+### 7.1 配置 `.env`
+
+在项目根目录创建/填写 `.env`：
+
+```env
+OPENAI_API_KEY=your-openai-key-here
+DASHSCOPE_API_KEY=your-dashscope-key-here
 ```
 
-### 3. 下载数据集
-1. 访问天池淘宝用户行为数据集：https://tianchi.aliyun.com/dataset/dataDetail?dataId=649
-2. 下载 UserBehavior.csv
-3. 将下载后的 UserBehavior.csv 放入 data/ 目录下
+### 7.2 配置模型
 
-### 4. 运行项目
+[config.py](file:///Users/liuwen.107/PycharmProjects/Marketing-Agent-System/config.py) 默认：
+
+- `MODEL_NAME = "gpt-4o"`
+- 使用 `OPENAI_API_KEY`
+
+如果切换到其他模型，请同步修改 [config.py](file:///Users/liuwen.107/PycharmProjects/Marketing-Agent-System/config.py) 中模型配置。
+
+---
+
+## 8. 数据准备
+
+请将 Olist 相关 CSV 文件放到 `data/olist/` 目录，至少包含：
+
+- `olist_orders_dataset.csv`
+- `olist_order_items_dataset.csv`
+- `olist_order_payments_dataset.csv`
+- `olist_customers_dataset.csv`
+- `olist_products_dataset.csv`
+- `product_category_name_translation.csv`
+
+---
+
+## 9. 运行项目
+
+请在项目根目录运行（推荐方式）：
+
 ```bash
-python src/main.py
+python -m src.main
 ```
 
-## 运行效果示例
-```
-==================================================
-营销自动化多智能体系统启动
-==================================================
-[用户分析Agent] 正在分析用户数据...
-[用户分析Agent] 用户分层结果：
-中价值用户    4500
-低价值用户    3200
-高价值用户    2300
+---
 
-[策略Agent] 生成的策略：
-{'segment': '中价值用户', 'offer': '满199减50优惠券'}
+## 10. 常见问题排查
 
-[文案生成Agent] 生成的文案：
-尊敬的用户，您专属的满199减50优惠券已到账！
+### 10.1 `ModuleNotFoundError: No module named 'config'`
+不要用 `python src/main.py`，请使用：
 
-[效果评估Agent] 评估报告：
-预计点击率提升 6.23%
+```bash
+python -m src.main
 ```
 
-## 项目亮点
-- 真实业务场景：面向电商用户的自动化营销闭环，贴合增长/营销算法落地需求
-- 多智能体协同：用户分析 → 策略决策 → 文案生成 → 效果评估全流程串联
-- 传统算法+大模型结合：使用 RFM 用户分层模型 + LLM 实现个性化营销能力
-- 工程规范：模块化设计，依赖清晰，可直接复现运行
+### 10.2 `FileNotFoundError`（知识库或数据路径）
+项目已在 [config.py](file:///Users/liuwen.107/PycharmProjects/Marketing-Agent-System/config.py) 中使用绝对路径拼接；请确认：
 
-## 注意事项
-- 请确保 data/UserBehavior.csv 路径正确
-- API Key 不要上传到公开仓库
+- `knowledge_base/` 存在且包含 `.md` 文件
+- `data/olist/` 数据齐全
+
+### 10.3 `Unresolved reference 'langchain_community'` 等
+说明当前解释器缺少依赖，执行：
+
+```bash
+pip install -r requirements.txt
+```
+
+并确认 IDE 使用的是项目虚拟环境解释器。
+
+---
+
+## 11. 输出示例（简化）
+
+```text
+============================================================
+升级版营销自动化多智能体系统启动
+============================================================
+[用户分析Agent] ...
+[商品推荐Agent] ...
+[策略Agent] ...
+[文案生成Agent] ...
+[效果评估Agent] ...
+============================================================
+最终营销方案汇总
+============================================================
+用户ID：xxx
+用户分层：高价值忠诚用户
+...
+```
+
+---
+
+## 12. 后续可扩展方向
+
+- 将策略与文案输出标准化为严格 JSON Schema
+- 引入在线 A/B Test 反馈闭环
+- 将评估模型替换为真实业务标签训练
+- 增加多渠道模板（短信/邮件/Push）自动适配
+- 将知识库更新与向量索引构建流程自动化

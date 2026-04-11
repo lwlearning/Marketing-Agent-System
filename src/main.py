@@ -1,39 +1,125 @@
 import config
 from src.agents.user_analysis_agent import UserAnalysisAgent
+from src.agents.product_recommendation_agent import ProductRecommendationAgent
 from src.agents.strategy_agent import StrategyAgent
 from src.agents.content_generation_agent import ContentGenerationAgent
 from src.agents.evaluation_agent import EvaluationAgent
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Dict, Any
+
+
+# 定义状态
+class State(TypedDict):
+    customer_unique_id: str
+    user_profile: Dict[str, Any]
+    recommended_products: list
+    strategy: Dict[str, Any]
+    content: str
+    evaluation_report: Dict[str, Any]
+
+
+# 初始化所有Agent
+print("=" * 60)
+print("升级版营销自动化多智能体系统启动")
+print("=" * 60)
+
+user_agent = UserAnalysisAgent()
+product_agent = ProductRecommendationAgent(user_agent.order_items, user_agent.products)
+strategy_agent = StrategyAgent()
+content_agent = ContentGenerationAgent()
+eval_agent = EvaluationAgent(user_agent.orders)
+
+
+# 定义工作流节点
+def analyze_user(state: State):
+    user_profile = user_agent.analyze_user(state["customer_unique_id"])
+    return {"user_profile": user_profile}
+
+
+def recommend_products(state: State):
+    recommended_products = product_agent.recommend_products(state["user_profile"])
+    return {"recommended_products": recommended_products}
+
+
+def generate_strategy(state: State):
+    strategy = strategy_agent.generate_strategy(state["user_profile"])
+    return {"strategy": strategy}
+
+
+def generate_content(state: State):
+    content = content_agent.generate_content(
+        state["user_profile"],
+        state["strategy"],
+        state["recommended_products"]
+    )
+    return {"content": content}
+
+
+def evaluate(state: State):
+    evaluation_report = eval_agent.evaluate(
+        state["user_profile"],
+        state["strategy"],
+        state["content"]
+    )
+    return {"evaluation_report": evaluation_report}
+
+
+# 构建工作流
+workflow = StateGraph(State)
+
+# 添加节点
+workflow.add_node("analyze_user", analyze_user)
+workflow.add_node("recommend_products", recommend_products)
+workflow.add_node("generate_strategy", generate_strategy)
+workflow.add_node("generate_content", generate_content)
+workflow.add_node("evaluate", evaluate)
+
+# 设置边
+workflow.set_entry_point("analyze_user")
+workflow.add_edge("analyze_user", "recommend_products")
+workflow.add_edge("recommend_products", "generate_strategy")
+workflow.add_edge("generate_strategy", "generate_content")
+workflow.add_edge("generate_content", "evaluate")
+workflow.add_edge("evaluate", END)
+
+# 编译工作流
+app = workflow.compile()
 
 
 def main():
-    print("=" * 50)
-    print("营销自动化多智能体系统启动")
-    print("=" * 50)
+    # 获取一个样本用户ID
+    sample_users = user_agent.get_sample_users(segment="高价值忠诚用户", n=1)
+    customer_unique_id = sample_users[0]
 
-    # 1. 初始化各个Agent
-    user_agent = UserAnalysisAgent(config.DATA_PATH)
-    strategy_agent = StrategyAgent(config.KNOWLEDGE_BASE_PATH)
-    content_agent = ContentGenerationAgent()
-    eval_agent = EvaluationAgent()
+    print(f"\n开始处理用户：{customer_unique_id}")
+    print("-" * 60)
 
-    # 2. 随机选一个用户ID作为示例
-    sample_user_id = 10001  # 示例用户ID
+    # 运行工作流
+    result = app.invoke({
+        "customer_unique_id": customer_unique_id
+    })
 
-    # 3. 执行多智能体流程
-    user_profile = user_agent.analyze(sample_user_id)
-    strategy = strategy_agent.generate_strategy(user_profile)
-    content = content_agent.generate_content(user_profile, strategy)
-    report = eval_agent.evaluate(strategy, content)
-
-    # 4. 输出最终结果
-    print("=" * 50)
+    # 输出最终结果
+    print("=" * 60)
     print("最终营销方案汇总")
-    print("=" * 50)
-    print(f"用户分层：{strategy['segment']}")
-    print(f"营销策略：{strategy['offer']}")
-    print(f"营销文案：{content}")
-    print(f"预期效果：点击率提升 {report['improvement']}")
-    print("=" * 50)
+    print("=" * 60)
+    print(f"用户ID：{result['customer_unique_id']}")
+    print(f"用户分层：{result['user_profile']['user_segment']}")
+    print(f"购买次数：{result['user_profile']['frequency']}次")
+    print(f"总消费：${result['user_profile']['monetary']:.2f}")
+    print(f"\n营销策略：{result['strategy'].get('优惠类型和力度', '无')}")
+    print(f"触达渠道：{result['strategy'].get('最佳触达渠道', '无')}")
+    print(f"触达时间：{result['strategy'].get('最佳触达时间', '无')}")
+    print(f"\n推荐商品：")
+    for product in result['recommended_products']:
+        print(f"  - {product['product_name']}，价格：${product['price']:.2f}")
+    print(f"\n营销文案：{result['content']}")
+    print(f"\n效果预测：")
+    print(f"  - 预测转化率：{result['evaluation_report']['预测转化率']}")
+    print(f"  - 提升幅度：{result['evaluation_report']['提升幅度']}")
+    print(f"  - 预期ROI：{result['evaluation_report']['预期ROI']}")
+    print(f"  - 建议：{result['evaluation_report']['建议']}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
