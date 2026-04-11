@@ -23,6 +23,8 @@ class ContentGenerationAgent:
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", "你是一个专业的电商文案专家。请根据用户画像、营销策略和商品推荐，生成一条吸引人的营销短信文案。"),
+            # # 2. (可选) assistant：给模型示范回答（少样本学习）
+            # ("assistant", "【新人福利】首单立减30！推荐爆款笔记本$29.9，速购~"),
             ("user", """
 用户画像：
 - 用户分层：{user_segment}
