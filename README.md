@@ -31,6 +31,7 @@
 
 ```text
 Marketing-Agent-System/
+├── main.py # 项目主入口（根目录启动）
 ├── .env
 ├── config.py
 ├── requirements.txt
@@ -153,33 +154,7 @@ python -m src.main
 
 ---
 
-## 10. 常见问题排查
-
-### 10.1 `ModuleNotFoundError: No module named 'config'`
-不要用 `python src/main.py`，请使用：
-
-```bash
-python -m src.main
-```
-
-### 10.2 `FileNotFoundError`（知识库或数据路径）
-项目已在 [config.py](file:///Users/liuwen.107/PycharmProjects/Marketing-Agent-System/config.py) 中使用绝对路径拼接；请确认：
-
-- `knowledge_base/` 存在且包含 `.md` 文件
-- `data/olist/` 数据齐全
-
-### 10.3 `Unresolved reference 'langchain_community'` 等
-说明当前解释器缺少依赖，执行：
-
-```bash
-pip install -r requirements.txt
-```
-
-并确认 IDE 使用的是项目虚拟环境解释器。
-
----
-
-## 11. 输出示例（简化）
+## 10. 输出示例（简化）
 
 ```text
 ============================================================
@@ -200,7 +175,7 @@ pip install -r requirements.txt
 
 ---
 
-## 12. 后续可扩展方向
+## 11. 后续可扩展方向
 
 - 将策略与文案输出标准化为严格 JSON Schema
 - 引入在线 A/B Test 反馈闭环
