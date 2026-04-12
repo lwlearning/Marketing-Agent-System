@@ -3,12 +3,12 @@ from src.agents.user_analysis_agent import UserAnalysisAgent
 from src.agents.product_recommendation_agent import ProductRecommendationAgent
 from src.agents.strategy_agent import StrategyAgent
 from src.agents.content_generation_agent import ContentGenerationAgent
-from src.agents.evaluation_agent import EvaluationAgent
+from src.agents.evaluation_agent import EvaluationAgent  # 正确类名
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Dict, Any
 
 
-# 定义状态
+# 定义状态（保持不变）
 class State(TypedDict):
     customer_unique_id: str
     user_profile: Dict[str, Any]
@@ -27,10 +27,10 @@ user_agent = UserAnalysisAgent()
 product_agent = ProductRecommendationAgent(user_agent.order_items, user_agent.products)
 strategy_agent = StrategyAgent()
 content_agent = ContentGenerationAgent()
-eval_agent = EvaluationAgent(user_agent.orders)
+eval_agent = EvaluationAgent(user_agent.orders)  # 传入订单数据训练模型
 
 
-# 定义工作流节点
+# 定义工作流节点（完全不变）
 def analyze_user(state: State):
     user_profile = user_agent.analyze_user(state["customer_unique_id"])
     return {"user_profile": user_profile}
@@ -66,15 +66,12 @@ def evaluate(state: State):
 
 # 构建工作流
 workflow = StateGraph(State)
-
-# 添加节点
 workflow.add_node("analyze_user", analyze_user)
 workflow.add_node("recommend_products", recommend_products)
 workflow.add_node("generate_strategy", generate_strategy)
 workflow.add_node("generate_content", generate_content)
 workflow.add_node("evaluate", evaluate)
 
-# 设置边
 workflow.set_entry_point("analyze_user")
 workflow.add_edge("analyze_user", "recommend_products")
 workflow.add_edge("recommend_products", "generate_strategy")
@@ -82,17 +79,15 @@ workflow.add_edge("generate_strategy", "generate_content")
 workflow.add_edge("generate_content", "evaluate")
 workflow.add_edge("evaluate", END)
 
-# 编译工作流
 app = workflow.compile()
 
 
 def main():
-    # 先打印一下实际有哪些分层，做到心里有数
     print("当前数据中的用户分层：")
     print(user_agent.rfm["user_segment"].value_counts())
     print("-" * 60)
 
-    # 获取一个样本用户ID（不指定分层，直接随机取）
+    # 获取样本用户
     sample_users = user_agent.get_sample_users(n=1)
     customer_unique_id = sample_users[0]
 
@@ -104,7 +99,9 @@ def main():
         "customer_unique_id": customer_unique_id
     })
 
-    # 输出最终结果
+    # ==================== ✅ 核心修改：对齐新评估报告字段 ====================
+    report = result['evaluation_report']
+
     print("=" * 60)
     print("最终营销方案汇总")
     print("=" * 60)
@@ -119,11 +116,14 @@ def main():
     for product in result['recommended_products']:
         print(f"  - {product['product_name']}，价格：${product['price']:.2f}")
     print(f"\n营销文案：{result['content']}")
-    print(f"\n效果预测：")
-    print(f"  - 预测转化率：{result['evaluation_report']['预测转化率']}")
-    print(f"  - 提升幅度：{result['evaluation_report']['提升幅度']}")
-    print(f"  - 预期ROI：{result['evaluation_report']['预期ROI']}")
-    print(f"  - 建议：{result['evaluation_report']['建议']}")
+    print(f"\n效果预测（工业级真实评估）：")
+    print(f"  - 基础转化率(自然)：{report['基础转化率(自然)']}")
+    print(f"  - 营销后预测转化率：{report['营销后预测转化率']}")
+    print(f"  - 转化率提升幅度：{report['转化率提升幅度']}")  # 字段已修改
+    print(f"  - 单用户营销成本：{report['单用户营销成本']}")
+    print(f"  - 营销增量营收：{report['营销增量营收']}")
+    print(f"  - ✅ 真实营销ROI：{report['✅ 真实营销ROI']}")  # 字段已修改
+    print(f"  - 运营建议：{report['建议']}")
     print("=" * 60)
 
 
