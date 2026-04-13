@@ -67,7 +67,7 @@ class RAGService:
 
         # 🔥 核心优化3：禁用默认retriever，使用自定义高精度检索
         self.top_k = 3
-        self.score_threshold = 0.7  # 相似度阈值，过滤无效结果
+        self.dist_threshold = 0.7  # 相似度阈值，过滤无效结果
 
     def _load_local_vector_store(self):
         """加载本地持久化的FAISS索引（速度提升100倍，超大库首选）"""
@@ -144,11 +144,11 @@ class RAGService:
         results = []
         seen_contents = set()
 
-        for doc, score in docs_with_scores:
+        for doc, dist in docs_with_scores:
             content = doc.page_content.strip()
             # 去重 + 相似度阈值过滤 + 元数据过滤
             if (content not in seen_contents
-                    and score <= self.score_threshold
+                    and dist <= self.dist_threshold
                     and (not filter_metadata or doc.metadata.get("type") == filter_metadata)):
                 results.append(content)
                 seen_contents.add(content)
