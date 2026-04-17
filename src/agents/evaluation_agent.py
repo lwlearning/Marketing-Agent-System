@@ -147,7 +147,7 @@ class EvaluationAgent:
             "单用户营销成本": f"¥{total_marketing_cost:.2f}",
             "营销增量营收": f"¥{incremental_revenue:.2f}",
             "✅ 真实营销ROI": f"{roi:.2f}",
-            "建议": "建议立即上线测试" if roi > 1.0 and predicted_conversion > 0.05 else "建议优化优惠力度后再测试"
+            "建议": "建议立即上线测试" if roi >= 0.9 and predicted_conversion > 0.05 else "建议优化优惠力度后再测试"
         }
 
         # 打印输出

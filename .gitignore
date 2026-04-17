@@ -12,8 +12,6 @@ __pycache__/
 env/
 venv/
 ENV/
-env/
-venv/
 
 # IDE 配置
 .idea/
@@ -28,3 +26,13 @@ data/*.zip
 # 日志
 logs/
 *.log
+
+# FAISS vector index
+faiss.index
+faiss_meta.npy
+faiss_rag_index/
+
+# 向量缓存
+*.faiss
+*.npy
+*.pkl
