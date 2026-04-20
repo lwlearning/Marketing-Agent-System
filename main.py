@@ -27,7 +27,7 @@ user_agent = UserAnalysisAgent()
 product_agent = ProductRecommendationAgent(user_agent.order_items, user_agent.products)
 strategy_agent = StrategyAgent()
 content_agent = ContentGenerationAgent()
-eval_agent = EvaluationAgent(user_agent.orders)  # 传入订单数据训练模型
+eval_agent = EvaluationAgent(user_agent.orders, user_agent.order_items) # 传入订单数据训练模型
 
 
 # 定义工作流节点（完全不变）
@@ -119,10 +119,10 @@ def main():
     print(f"\n效果预测（工业级真实评估）：")
     print(f"  - 基础转化率(自然)：{report['基础转化率(自然)']}")
     print(f"  - 营销后预测转化率：{report['营销后预测转化率']}")
-    print(f"  - 转化率提升幅度：{report['转化率提升幅度']}")  # 字段已修改
+    print(f"  - 转化率提升幅度：{report['转化率提升幅度']}")
     print(f"  - 单用户营销成本：{report['单用户营销成本']}")
     print(f"  - 营销增量营收：{report['营销增量营收']}")
-    print(f"  - ✅ 真实营销ROI：{report['✅ 真实营销ROI']}")  # 字段已修改
+    print(f"  - ✅ 营销ROI：{report['✅ 营销ROI']}")
     print(f"  - 运营建议：{report['建议']}")
     print("=" * 60)
 

@@ -6,6 +6,11 @@
 """
 import os
 from dotenv import load_dotenv
+# 项目根目录
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 模型目录
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+CONVERSION_MODEL_PATH = os.path.join(MODEL_DIR, "conversion_v1.joblib")
 
 # 加载环境变量
 load_dotenv()
