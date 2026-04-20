@@ -36,3 +36,9 @@ faiss_rag_index/
 *.faiss
 *.npy
 *.pkl
+
+# 模型文件（必须加）
+models/
+*.joblib
+*.pth
+*.h5
