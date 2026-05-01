@@ -148,18 +148,28 @@ class EvaluationAgent:
         multiplier = segment_multipliers.get(segment, 1.0)
 
         offer = strategy.get("优惠类型和力度", "")
-        if "5折" in offer:
-            multiplier *= 1.5
-        elif "减30" in offer or "满100减20" in offer:
-            multiplier *= 1.3
-        elif "9折" in offer:
-            multiplier *= 1.1
+
+        configured_discount_cost = strategy.get("优惠成本", None)
+        if configured_discount_cost is None:
+            discount_cost = self._extract_discount_amount(offer, user_profile["avg_order_value"])
+        else:
+            try:
+                discount_cost = float(configured_discount_cost)
+            except (ValueError, TypeError):
+                discount_cost = self._extract_discount_amount(offer, user_profile["avg_order_value"])
+
+        configured_channel_cost = strategy.get("触达渠道成本", self.SMS_COST)
+        try:
+            channel_cost = float(configured_channel_cost)
+        except (ValueError, TypeError):
+            channel_cost = self.SMS_COST
+
+        discount_cost = max(0.0, discount_cost)
+        channel_cost = max(0.0, channel_cost)
+        total_marketing_cost = discount_cost + channel_cost
 
         predicted_conversion = base_conversion * multiplier
         predicted_conversion = min(0.8, predicted_conversion)
-
-        discount_cost = self._extract_discount_amount(offer, user_profile["avg_order_value"])
-        total_marketing_cost = discount_cost + self.SMS_COST
         incremental_revenue = user_profile["avg_order_value"] * (predicted_conversion - base_conversion)
         roi = incremental_revenue / total_marketing_cost if total_marketing_cost > 0 else 0.0
         roi = round(roi, 2)
